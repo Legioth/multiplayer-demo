@@ -1,5 +1,11 @@
 package com.example.multiplayer.views.collaborativemasterdetail;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
 import com.example.multiplayer.data.entity.SamplePerson;
 import com.example.multiplayer.data.service.SamplePersonService;
 import com.example.multiplayer.views.MainLayout;
@@ -30,22 +36,21 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+
 import jakarta.annotation.security.PermitAll;
-import java.util.Optional;
-import java.util.UUID;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 @PageTitle("Collaborative Master-Detail")
 @Route(value = "collaborative-master-detail/:samplePersonID?/:action?(edit)", layout = MainLayout.class)
 @PermitAll
 @Uses(Icon.class)
-public class CollaborativeMasterDetailView extends Div implements BeforeEnterObserver {
+public class CollaborativeMasterDetailView extends Div
+        implements BeforeEnterObserver {
 
     private final String SAMPLEPERSON_ID = "samplePersonID";
     private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "collaborative-master-detail/%s/edit";
 
-    private final Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private final Grid<SamplePerson> grid = new Grid<>(SamplePerson.class,
+            false);
 
     CollaborationAvatarGroup avatarGroup;
 
@@ -67,7 +72,8 @@ public class CollaborativeMasterDetailView extends Div implements BeforeEnterObs
 
     private final SamplePersonService samplePersonService;
 
-    public CollaborativeMasterDetailView(SamplePersonService samplePersonService) {
+    public CollaborativeMasterDetailView(
+            SamplePersonService samplePersonService) {
         this.samplePersonService = samplePersonService;
         addClassNames("collaborative-master-detail-view");
 
@@ -77,7 +83,8 @@ public class CollaborativeMasterDetailView extends Div implements BeforeEnterObs
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
+        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(),
+                "Steve Lange");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -98,24 +105,35 @@ public class CollaborativeMasterDetailView extends Div implements BeforeEnterObs
         grid.addColumn("dateOfBirth").setAutoWidth(true);
         grid.addColumn("occupation").setAutoWidth(true);
         grid.addColumn("role").setAutoWidth(true);
-        LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
-                "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
-                .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
+        LitRenderer<SamplePerson> importantRenderer = LitRenderer
+                .<SamplePerson> of(
+                        "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
+                .withProperty("icon",
+                        important -> important.isImportant() ? "check"
+                                : "minus")
+                .withProperty("color",
                         important -> important.isImportant()
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
+        grid.addColumn(importantRenderer).setHeader("Important")
+                .setAutoWidth(true);
 
-        grid.setItems(query -> samplePersonService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
+        grid.setItems(
+                query -> samplePersonService
+                        .list(PageRequest
+                                .of(query.getPage(), query.getPageSize(),
+                                        VaadinSpringDataHelpers
+                                                .toSpringDataSort(query)))
+                        .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(
+                        String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE,
+                                event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(CollaborativeMasterDetailView.class);
@@ -151,21 +169,25 @@ public class CollaborativeMasterDetailView extends Div implements BeforeEnterObs
                 n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (ValidationException validationException) {
-                Notification.show("Failed to update the data. Check again that all values are valid");
+                Notification.show(
+                        "Failed to update the data. Check again that all values are valid");
             }
         });
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(Long::parseLong);
+        Optional<Long> samplePersonId = event.getRouteParameters()
+                .get(SAMPLEPERSON_ID).map(Long::parseLong);
         if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
+            Optional<SamplePerson> samplePersonFromBackend = samplePersonService
+                    .get(samplePersonId.get());
             if (samplePersonFromBackend.isPresent()) {
                 populateForm(samplePersonFromBackend.get());
             } else {
-                Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %d", samplePersonId.get()), 3000,
+                Notification.show(String.format(
+                        "The requested samplePerson was not found, ID = %d",
+                        samplePersonId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
@@ -192,7 +214,8 @@ public class CollaborativeMasterDetailView extends Div implements BeforeEnterObs
         occupation = new TextField("Occupation");
         role = new TextField("Role");
         important = new Checkbox("Important");
-        formLayout.add(firstName, lastName, email, phone, dateOfBirth, occupation, role, important);
+        formLayout.add(firstName, lastName, email, phone, dateOfBirth,
+                occupation, role, important);
 
         editorDiv.add(avatarGroup, formLayout);
         createButtonLayout(editorLayoutDiv);

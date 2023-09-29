@@ -1,11 +1,13 @@
 package com.example.multiplayer.data.service;
 
-import com.example.multiplayer.data.entity.SamplePerson;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import com.example.multiplayer.data.entity.SamplePerson;
 
 @Service
 public class SamplePersonService {
@@ -32,7 +34,8 @@ public class SamplePersonService {
         return repository.findAll(pageable);
     }
 
-    public Page<SamplePerson> list(Pageable pageable, Specification<SamplePerson> filter) {
+    public Page<SamplePerson> list(Pageable pageable,
+            Specification<SamplePerson> filter) {
         return repository.findAll(filter, pageable);
     }
 

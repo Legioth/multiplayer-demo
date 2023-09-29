@@ -20,7 +20,8 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
     public LoginView(AuthenticatedUser authenticatedUser) {
         this.authenticatedUser = authenticatedUser;
-        setAction(RouteUtil.getRoutePath(VaadinService.getCurrent().getContext(), getClass()));
+        setAction(RouteUtil.getRoutePath(
+                VaadinService.getCurrent().getContext(), getClass()));
 
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
@@ -41,6 +42,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
             event.forwardTo("");
         }
 
-        setError(event.getLocation().getQueryParameters().getParameters().containsKey("error"));
+        setError(event.getLocation().getQueryParameters().getParameters()
+                .containsKey("error"));
     }
 }

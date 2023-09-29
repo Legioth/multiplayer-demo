@@ -1,5 +1,10 @@
 package com.example.multiplayer.views;
 
+import java.io.ByteArrayInputStream;
+import java.util.Optional;
+
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
 import com.example.multiplayer.data.entity.User;
 import com.example.multiplayer.security.AuthenticatedUser;
 import com.example.multiplayer.views.about.AboutView;
@@ -24,9 +29,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.io.ByteArrayInputStream;
-import java.util.Optional;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -38,7 +40,8 @@ public class MainLayout extends AppLayout {
     private AuthenticatedUser authenticatedUser;
     private AccessAnnotationChecker accessChecker;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+    public MainLayout(AuthenticatedUser authenticatedUser,
+            AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
 
@@ -52,14 +55,16 @@ public class MainLayout extends AppLayout {
         toggle.setAriaLabel("Menu toggle");
 
         viewTitle = new H2();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        viewTitle.addClassNames(LumoUtility.FontSize.LARGE,
+                LumoUtility.Margin.NONE);
 
         addToNavbar(true, toggle, viewTitle);
     }
 
     private void addDrawerContent() {
         H1 appName = new H1("My Multiplayer App");
-        appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        appName.addClassNames(LumoUtility.FontSize.LARGE,
+                LumoUtility.Margin.NONE);
         Header header = new Header(appName);
 
         Scroller scroller = new Scroller(createNavigation());
@@ -71,15 +76,18 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessChecker.hasAccess(HelloWorldView.class)) {
-            nav.addItem(new SideNavItem("Hello World", HelloWorldView.class, LineAwesomeIcon.GLOBE_SOLID.create()));
+            nav.addItem(new SideNavItem("Hello World", HelloWorldView.class,
+                    LineAwesomeIcon.GLOBE_SOLID.create()));
 
         }
         if (accessChecker.hasAccess(AboutView.class)) {
-            nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.FILE.create()));
+            nav.addItem(new SideNavItem("About", AboutView.class,
+                    LineAwesomeIcon.FILE.create()));
 
         }
         if (accessChecker.hasAccess(CollaborativeMasterDetailView.class)) {
-            nav.addItem(new SideNavItem("Collaborative Master-Detail", CollaborativeMasterDetailView.class,
+            nav.addItem(new SideNavItem("Collaborative Master-Detail",
+                    CollaborativeMasterDetailView.class,
                     LineAwesomeIcon.COLUMNS_SOLID.create()));
 
         }
@@ -133,7 +141,8 @@ public class MainLayout extends AppLayout {
     }
 
     private String getCurrentPageTitle() {
-        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+        PageTitle title = getContent().getClass()
+                .getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
     }
 }

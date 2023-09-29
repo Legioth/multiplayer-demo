@@ -1,11 +1,13 @@
 package com.example.multiplayer.data.service;
 
-import com.example.multiplayer.data.entity.User;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import com.example.multiplayer.data.entity.User;
 
 @Service
 public class UserService {
