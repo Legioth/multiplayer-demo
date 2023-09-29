@@ -1,5 +1,6 @@
 package com.example.multiplayer.data.entity;
 
+import java.util.Base64;
 import java.util.Set;
 
 import com.example.multiplayer.data.Role;
@@ -67,6 +68,11 @@ public class User extends AbstractEntity {
 
     public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public String getProfilePictureUrl() {
+        return "data:image/png;base64,"
+                + Base64.getEncoder().encodeToString(profilePicture);
     }
 
 }

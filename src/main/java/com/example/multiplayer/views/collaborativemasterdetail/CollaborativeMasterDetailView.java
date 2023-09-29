@@ -1,13 +1,13 @@
 package com.example.multiplayer.views.collaborativemasterdetail;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.example.multiplayer.data.entity.SamplePerson;
 import com.example.multiplayer.data.service.SamplePersonService;
+import com.example.multiplayer.security.AuthenticatedUser;
 import com.example.multiplayer.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationBinder;
@@ -73,19 +73,14 @@ public class CollaborativeMasterDetailView extends Div
     private final SamplePersonService samplePersonService;
 
     public CollaborativeMasterDetailView(
-            SamplePersonService samplePersonService) {
+            SamplePersonService samplePersonService,
+            AuthenticatedUser authenticatedUser) {
         this.samplePersonService = samplePersonService;
+        
         addClassNames("collaborative-master-detail-view");
-
-        // UserInfo is used by Collaboration Engine and is used to share details
-        // of users to each other to able collaboration. Replace this with
-        // information about the actual user that is logged, providing a user
-        // identifier, and the user's real name. You can also provide the users
-        // avatar by passing an url to the image as a third parameter, or by
-        // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(),
-                "Steve Lange");
-
+        
+        UserInfo userInfo = authenticatedUser.getAsUserInfo().get();
+        
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
 

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.multiplayer.data.entity.User;
 import com.example.multiplayer.data.service.UserRepository;
+import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
 @Component
@@ -31,6 +32,12 @@ public class AuthenticatedUser {
 
     public void logout() {
         authenticationContext.logout();
+    }
+ 
+    @Transactional
+    public Optional<UserInfo> getAsUserInfo() {
+        return get().map(user -> new UserInfo(user.getUsername(),
+                user.getName(), user.getProfilePictureUrl()));
     }
 
 }
