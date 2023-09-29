@@ -35,9 +35,9 @@ public class AuthenticatedUser {
     }
  
     @Transactional
-    public Optional<UserInfo> getAsUserInfo() {
+    public UserInfo getAsUserInfo() {
         return get().map(user -> new UserInfo(user.getUsername(),
-                user.getName(), user.getProfilePictureUrl()));
+                user.getName(), user.getProfilePictureUrl())).get();
     }
 
 }

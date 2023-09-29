@@ -1,2 +1,19 @@
 @import url('./main-layout.css');
 @import url('./views/collaborative-master-detail-view.css');
+
+vaadin-text-field[readonly]::part(input-field) {
+  color: var(--lumo-body-text-color);
+}
+
+vaadin-text-field[readonly]::part(input-field)::after {
+  border: none;
+}
+
+vaadin-text-field::part(input-field):after {
+  transition: none;
+}
+
+vaadin-vertical-layout > vaadin-avatar-group {
+  width: auto;
+  align-self: flex-end;
+}

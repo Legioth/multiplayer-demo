@@ -7,9 +7,8 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.example.multiplayer.data.entity.User;
 import com.example.multiplayer.security.AuthenticatedUser;
-import com.example.multiplayer.views.about.AboutView;
-import com.example.multiplayer.views.collaborativemasterdetail.CollaborativeMasterDetailView;
-import com.example.multiplayer.views.helloworld.HelloWorldView;
+import com.example.multiplayer.views.collaborative.CollaborativeList;
+import com.example.multiplayer.views.contacts.ContactsList;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -75,23 +74,17 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        if (accessChecker.hasAccess(HelloWorldView.class)) {
-            nav.addItem(new SideNavItem("Hello World", HelloWorldView.class,
-                    LineAwesomeIcon.GLOBE_SOLID.create()));
-
-        }
-        if (accessChecker.hasAccess(AboutView.class)) {
-            nav.addItem(new SideNavItem("About", AboutView.class,
-                    LineAwesomeIcon.FILE.create()));
-
-        }
-        if (accessChecker.hasAccess(CollaborativeMasterDetailView.class)) {
-            nav.addItem(new SideNavItem("Collaborative Master-Detail",
-                    CollaborativeMasterDetailView.class,
-                    LineAwesomeIcon.COLUMNS_SOLID.create()));
+        if (accessChecker.hasAccess(ContactsList.class)) {
+            nav.addItem(new SideNavItem("Contacts (locking)", ContactsList.class,
+                    LineAwesomeIcon.LOCK_OPEN_SOLID.create()));
 
         }
 
+        if (accessChecker.hasAccess(ContactsList.class)) {
+            nav.addItem(new SideNavItem("Contacts (collab)", CollaborativeList.class,
+                    LineAwesomeIcon.USER_SOLID.create()));
+
+        }
         return nav;
     }
 
