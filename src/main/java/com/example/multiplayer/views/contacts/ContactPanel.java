@@ -6,7 +6,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.example.multiplayer.data.entity.Contact;
 import com.example.multiplayer.data.service.ContactService;
+import com.example.multiplayer.security.AuthenticatedUser;
 import com.example.multiplayer.views.MainLayout;
+import com.vaadin.collaborationengine.CollaborationAvatarGroup;
+import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -56,8 +59,13 @@ public class ContactPanel extends VerticalLayout
 
     private Contact contact;
 
-    public ContactPanel(ContactService contactService) {
+    private CollaborationAvatarGroup avatarGroup;
+
+    public ContactPanel(ContactService contactService,
+            AuthenticatedUser authenticatedUser) {
         this.contactService = contactService;
+
+        UserInfo localUser = authenticatedUser.getAsUserInfo();
 
         binder = new Binder<>(Contact.class);
         binder.bindInstanceFields(this);
@@ -76,7 +84,9 @@ public class ContactPanel extends VerticalLayout
 
         FormLayout form = new FormLayout(name, email, phone, occupation);
 
-        add(form, viewButtonLayout, editButtonLayout);
+        avatarGroup = new CollaborationAvatarGroup(localUser, null);
+
+        add(avatarGroup, form, viewButtonLayout, editButtonLayout);
     }
 
     @Override
@@ -87,6 +97,9 @@ public class ContactPanel extends VerticalLayout
 
         if (contactFromBackend.isPresent()) {
             contact = contactFromBackend.get();
+
+            String topicId = "contact/" + contactId;
+            avatarGroup.setTopic(topicId);
 
             boolean edit = event.getRouteParameters().get(ACTION).isPresent();
 
