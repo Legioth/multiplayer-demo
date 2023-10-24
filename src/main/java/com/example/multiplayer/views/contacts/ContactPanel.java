@@ -9,6 +9,8 @@ import com.example.multiplayer.data.service.ContactService;
 import com.example.multiplayer.security.AuthenticatedUser;
 import com.example.multiplayer.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
+import com.vaadin.collaborationengine.CollaborationMessageInput;
+import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -60,6 +62,7 @@ public class ContactPanel extends VerticalLayout
     private Contact contact;
 
     private CollaborationAvatarGroup avatarGroup;
+    private CollaborationMessageList messageList;
 
     public ContactPanel(ContactService contactService,
             AuthenticatedUser authenticatedUser) {
@@ -85,8 +88,9 @@ public class ContactPanel extends VerticalLayout
         FormLayout form = new FormLayout(name, email, phone, occupation);
 
         avatarGroup = new CollaborationAvatarGroup(localUser, null);
+        messageList = new CollaborationMessageList(localUser, null);
 
-        add(avatarGroup, form, viewButtonLayout, editButtonLayout);
+        add(avatarGroup, form, viewButtonLayout, editButtonLayout, messageList, new CollaborationMessageInput(messageList));
     }
 
     @Override
@@ -100,6 +104,7 @@ public class ContactPanel extends VerticalLayout
 
             String topicId = "contact/" + contactId;
             avatarGroup.setTopic(topicId);
+            messageList.setTopic(topicId);
 
             boolean edit = event.getRouteParameters().get(ACTION).isPresent();
 
