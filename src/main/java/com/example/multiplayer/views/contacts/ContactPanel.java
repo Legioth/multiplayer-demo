@@ -159,6 +159,7 @@ public class ContactPanel extends VerticalLayout
 
         if (hasLock && !editButtonLayout.isVisible()) {
             editContact();
+            Notification.show("You can edit now");
         }
 
         status.setText(
