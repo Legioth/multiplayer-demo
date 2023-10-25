@@ -1,5 +1,6 @@
 package com.example.multiplayer.views.contacts;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -11,12 +12,15 @@ import com.example.multiplayer.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
+import com.vaadin.collaborationengine.PresenceManager;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -63,12 +67,18 @@ public class ContactPanel extends VerticalLayout
 
     private CollaborationAvatarGroup avatarGroup;
     private CollaborationMessageList messageList;
+    private PresenceManager presenceManager;
+
+    private Div status = new Div();
+    private Checkbox wait = new Checkbox("Wait");
+    private UserInfo localUser;
+    private ArrayList<UserInfo> queue = new ArrayList<>();
 
     public ContactPanel(ContactService contactService,
             AuthenticatedUser authenticatedUser) {
         this.contactService = contactService;
 
-        UserInfo localUser = authenticatedUser.getAsUserInfo();
+        localUser = authenticatedUser.getAsUserInfo();
 
         binder = new Binder<>(Contact.class);
         binder.bindInstanceFields(this);
@@ -76,7 +86,10 @@ public class ContactPanel extends VerticalLayout
         back.addClickListener(
                 e -> UI.getCurrent().navigate(ContactsList.class));
 
-        edit.addClickListener(e -> editContact());
+        edit.addClickListener(e -> presenceManager.markAsPresent(true));
+
+        wait.addValueChangeListener(
+                e -> presenceManager.markAsPresent(e.getValue()));
 
         cancel.addClickListener(e -> viewContact());
 
@@ -90,7 +103,8 @@ public class ContactPanel extends VerticalLayout
         avatarGroup = new CollaborationAvatarGroup(localUser, null);
         messageList = new CollaborationMessageList(localUser, null);
 
-        add(avatarGroup, form, viewButtonLayout, editButtonLayout, messageList, new CollaborationMessageInput(messageList));
+        add(avatarGroup, form, viewButtonLayout, editButtonLayout, wait, status,
+                messageList, new CollaborationMessageInput(messageList));
     }
 
     @Override
@@ -106,15 +120,49 @@ public class ContactPanel extends VerticalLayout
             avatarGroup.setTopic(topicId);
             messageList.setTopic(topicId);
 
-            boolean edit = event.getRouteParameters().get(ACTION).isPresent();
+            if (presenceManager != null) {
+                presenceManager.close();
+            }
+            presenceManager = new PresenceManager(this, localUser,
+                    "queue/" + topicId);
+            presenceManager.setPresenceHandler(context -> {
+                UserInfo user = context.getUser();
+                queue.add(user);
+                queueUpdated();
+                return () -> {
+                    queue.remove(user);
+                    queueUpdated();
+                };
+            });
+            queueUpdated();
 
-            updateForm(edit);
+            boolean edit = event.getRouteParameters().get(ACTION).isPresent();
+            presenceManager.markAsPresent(edit);
+
+            updateForm(false);
         } else {
             Notification.show(String.format(
                     "The requested contact was not found, ID = %s", contactId),
                     3000, Notification.Position.BOTTOM_START);
             event.forwardTo(ContactsList.class);
         }
+    }
+
+    private void queueUpdated() {
+        UserInfo first = queue.stream().findFirst().orElse(null);
+
+        boolean hasLock = localUser.equals(first);
+        boolean isLocked = first != null;
+
+        edit.setEnabled(!isLocked);
+        wait.setVisible(isLocked && !hasLock);
+
+        if (hasLock && !editButtonLayout.isVisible()) {
+            editContact();
+        }
+
+        status.setText(
+                queue.stream().map(UserInfo::getName).toList().toString());
     }
 
     private void save() {
@@ -157,7 +205,8 @@ public class ContactPanel extends VerticalLayout
     private void viewContact() {
         UI.getCurrent().getPage().getHistory().replaceState(null,
                 String.format(CONTACT_VIEW_ROUTE_TEMPLATE, contact.getId()));
-
+        presenceManager.markAsPresent(false);
+        wait.setValue(false);
         updateForm(false);
     }
 
