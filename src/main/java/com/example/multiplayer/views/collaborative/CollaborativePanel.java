@@ -9,6 +9,7 @@ import com.example.multiplayer.data.service.ContactService;
 import com.example.multiplayer.security.AuthenticatedUser;
 import com.example.multiplayer.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
+import com.vaadin.collaborationengine.CollaborationBinder;
 import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
@@ -23,7 +24,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -52,7 +52,7 @@ public class CollaborativePanel extends VerticalLayout
     private final Button save = new Button("Save");
     private final Button back = new Button("Back");
 
-    private final Binder<Contact> binder;
+    private final CollaborationBinder<Contact> binder;
 
     private final ContactService contactService;
 
@@ -69,7 +69,7 @@ public class CollaborativePanel extends VerticalLayout
 
         UserInfo localUser = authenticatedUser.getAsUserInfo();
 
-        binder = new Binder<>(Contact.class);
+        binder = new CollaborationBinder<>(Contact.class, localUser);
         binder.bindInstanceFields(this);
 
         back.addClickListener(
@@ -121,7 +121,7 @@ public class CollaborativePanel extends VerticalLayout
         try {
             binder.writeBean(contact);
             contact = contactService.update(contact);
-            binder.readBean(contact);
+            binder.reset(contact);
 
             viewContact();
             Notification.show("Data updated");
@@ -170,7 +170,9 @@ public class CollaborativePanel extends VerticalLayout
 
     private void updateForm(boolean edit) {
         if (!edit) {
-            binder.readBean(contact);
+            binder.setTopic(null, () -> contact);
+        } else {
+            binder.setTopic("contact/" + contact.getId(), () -> contact);
         }
         binder.getFields().forEach(field -> field.setReadOnly(!edit));
         editButtonLayout.setVisible(edit);
